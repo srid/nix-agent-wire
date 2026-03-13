@@ -1,6 +1,9 @@
-# Srid's Claude Code Configuration
+# Srid's AI Code Agent Configuration
 
-This repo provides the `homeManagerModules.claude-code` flake output for auto-wiring your Claude Code configuration. My own Claude Code configuration exists in this same repo.
+This repo provides home-manager modules for auto-wiring AI code agent configurations:
+
+- `homeManagerModules.claude-code` - Claude Code
+- `homeManagerModules.opencode` - OpenCode
 
 ## Usage
 
@@ -14,7 +17,7 @@ Add as flake input:
 }
 ```
 
-Import the home-manager module and set `autoWire.dir`:
+### Claude Code
 
 ```nix
 {
@@ -29,9 +32,24 @@ Import the home-manager module and set `autoWire.dir`:
 }
 ```
 
+### OpenCode
+
+```nix
+{
+  imports = [
+    AI.homeManagerModules.opencode
+  ];
+
+  programs.opencode = {
+    enable = true;
+    autoWire.dir = AI;
+  };
+}
+```
+
 ## Directory Layout
 
-The `autoWire` feature expects this structure:
+Both modules use `autoWire` to discover configuration from a directory:
 
 ```
 .
@@ -44,27 +62,32 @@ The `autoWire` feature expects this structure:
 │   └── article-extractor/
 │       ├── SKILL.md  # Skill definition with @placeholder@
 │       └── default.nix  # Optional: builds tool, substitutes @placeholder@
-├── subagents/        # Subagent definitions (.md files)
+├── subagents/        # Subagent definitions (.md files) [Claude Code only]
 │   └── pre-commit.md
 ├── mcp/              # MCP server configs (.nix files)
 │   ├── chrome-devtools.nix
 │   └── nixos-mcp.nix
-├── settings.nix      # Claude Code settings
+├── settings.nix      # Claude Code settings [Claude Code only]
 └── memory.md         # Persistent memory/context
 ```
 
-**Files processed by autoWire:**
+**Claude Code autoWire:**
 
-- **commands/*.md** → Slash commands (e.g., `/hack`, `/pr`)
+- **commands/*.md** → Slash commands
 - **subagents/*.md** → Custom subagents for Task tool
-- **skills/*/SKILL.md** → Skills for specialized tasks
-  - If `default.nix` exists, builds package and substitutes `@skillname@` placeholders
-  - Example: `@article-extractor@` in SKILL.md becomes `/nix/store/.../bin/article-extractor`
+- **skills/*/SKILL.md** → Skills (with optional `default.nix` for placeholder substitution)
 - **mcp/*.nix** → MCP server configurations
 - **settings.nix** → Applied to `programs.claude-code.settings`
 - **memory.md** → Applied to `programs.claude-code.memory`
 
-### Skill Placeholder Substitution
+**OpenCode autoWire:**
+
+- **commands/*.md** → Slash commands
+- **skills/** → Skill directories (symlinked)
+- **mcp/*.nix** → MCP server configurations (transformed to opencode format)
+- **memory.md** → Applied to `programs.opencode.rules`
+
+### Skill Placeholder Substitution [Claude Code only]
 
 Skills with `default.nix` can use placeholders in `SKILL.md`:
 
