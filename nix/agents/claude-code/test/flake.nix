@@ -1,0 +1,66 @@
+{
+  description = "Claude Code home-manager module tests";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, nixpkgs, home-manager }:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+      claude-code-module = import ../home-manager-module.nix;
+      configDir = builtins.path { path = ./../../../..; name = "claude-code-config"; };
+    in
+    {
+      checks.${system} = {
+        claude-code-home-manager-test = pkgs.testers.runNixOSTest {
+          name = "claude-code-home-manager-module";
+
+          nodes.machine = { config, pkgs, ... }: {
+            imports = [
+              home-manager.nixosModules.home-manager
+            ];
+
+            users.users.testuser = {
+              isNormalUser = true;
+              uid = 1000;
+            };
+
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users.testuser = {
+                imports = [ claude-code-module ];
+
+                home = {
+                  username = "testuser";
+                  homeDirectory = "/home/testuser";
+                  stateVersion = "24.11";
+                };
+
+                programs.claude-code = {
+                  autoWire.dir = configDir;
+                };
+              };
+            };
+
+            system.stateVersion = "24.11";
+          };
+
+          testScript = ''
+            machine.start()
+            machine.wait_for_unit("home-manager-testuser.service")
+
+            # Verify skills are auto-wired
+            machine.succeed("test -d /home/testuser/.claude/skills")
+            machine.succeed("test -d /home/testuser/.claude/skills/nix")
+          '';
+        };
+      };
+    };
+}

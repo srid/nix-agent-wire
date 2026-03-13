@@ -1,19 +1,15 @@
 # Srid's Claude Code Configuration
 
-This repo provides the `nix/home-manager-module.nix` home-manager module for auto-wiring your Claude Code configuration. My own Claude Code configuration exists in this same repo.
+This repo provides the `homeManagerModules.claude-code` flake output for auto-wiring your Claude Code configuration. My own Claude Code configuration exists in this same repo.
 
 ## Usage
 
 Add as flake input:
 
-> [!TIP]
-> Since my configuration is in this very repo, I use [git submodules for faster iteration](https://nixos.asia/en/blog/git-submodule-input).
-
 ```nix
 {
   inputs = {
     AI.url = "github:srid/AI";
-    AI.flake = false;
   };
 }
 ```
@@ -23,7 +19,7 @@ Import the home-manager module and set `autoWire.dir`:
 ```nix
 {
   imports = [
-    "${AI}/nix/home-manager-module.nix"
+    AI.homeManagerModules.claude-code
   ];
 
   programs.claude-code = {
