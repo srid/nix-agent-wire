@@ -80,7 +80,9 @@ in
 
       commands = lib.mkIf (autoCommands != { }) (lib.mkDefault autoCommands);
 
-      skills = lib.mkIf (autoSkills != { }) (lib.mkDefault autoSkills);
+      skills = lib.mkMerge [
+        (lib.mkIf (autoSkills != { }) autoSkills)
+      ];
 
       agents = lib.mkIf (autoAgents != { }) (lib.mkDefault autoAgents);
 

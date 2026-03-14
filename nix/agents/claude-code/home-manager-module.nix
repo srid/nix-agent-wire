@@ -91,7 +91,9 @@ in
 
       agents = lib.mkDefault autoAgents;
 
-      skills = lib.mkIf (autoSkills != { }) (lib.mkDefault autoSkills);
+      skills = lib.mkMerge [
+        (lib.mkIf (autoSkills != { }) autoSkills)
+      ];
 
       mcpServers = lib.mkDefault autoMcpServers;
     };

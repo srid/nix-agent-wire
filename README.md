@@ -56,8 +56,8 @@ Both modules use `autoWire` to discover configuration from a directory:
 ├── commands/         # Slash commands (.md files)
 │   ├── hack.md       # /hack command
 │   └── pr.md         # /pr command
-├── skills/           # Skill directories
-│   └── nix/
+├── skills/           # Local skill directories
+│   └── haskell/
 │       └── SKILL.md  # Skill definition
 ├── agents/           # Agent definitions (.md files)
 │   └── code-reviewer.md
@@ -68,6 +68,10 @@ Both modules use `autoWire` to discover configuration from a directory:
 │   └── claude-code.nix  # Claude Code settings
 └── memory.md         # Persistent memory/context
 ```
+
+**External Skills:**
+
+Nix skills (`nix-flake`, `nix-haskell`) are provided by [juspay/skills](https://github.com/juspay/skills) and automatically included.
 
 **Both modules autoWire:**
 
