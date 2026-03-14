@@ -7,9 +7,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    skills.url = "github:juspay/skills";
   };
 
-  outputs = { self, nixpkgs, home-manager }:
+  outputs = { self, nixpkgs, home-manager, skills }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -35,7 +36,10 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               users.testuser = {
-                imports = [ opencode-module ];
+                imports = [
+                  skills.homeModules.opencode
+                  opencode-module
+                ];
 
                 home = {
                   username = "testuser";
@@ -62,7 +66,14 @@
 
             # Verify skills are auto-wired
             machine.succeed("test -d /home/testuser/.config/opencode/skill")
-            machine.succeed("test -d /home/testuser/.config/opencode/skill/nix")
+
+            # External skills from juspay/skills
+            machine.succeed("test -d /home/testuser/.config/opencode/skill/nix-flake")
+            machine.succeed("test -d /home/testuser/.config/opencode/skill/nix-haskell")
+
+            # Local skills from this repo
+            machine.succeed("test -d /home/testuser/.config/opencode/skill/haskell")
+            machine.succeed("test -d /home/testuser/.config/opencode/skill/technical-writer")
 
             # Verify opencode.json is created in XDG config location
             machine.succeed("test -f /home/testuser/.config/opencode/opencode.json")
@@ -92,7 +103,10 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               users.testuser = {
-                imports = [ opencode-module ];
+                imports = [
+                  skills.homeModules.opencode
+                  opencode-module
+                ];
 
                 home = {
                   username = "testuser";
