@@ -1,3 +1,8 @@
+---
+description: Resolve PR review comments
+subtask: true
+---
+
 # PR Review Command
 
 Fetch and resolve review comments from a GitHub pull request by implementing the requested changes.

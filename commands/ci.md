@@ -1,12 +1,17 @@
+---
+description: Stage, commit, and push changes
+subtask: true
+---
+
 # CI Command
 
-Stage all changes, generate a commit message, and commit after user approval.
+Stage all changes, generate a commit message, commit, and push after user approval.
 
 ## Usage
 
 ```
-/ci           # Normal mode - prompts for approval
-/ci yes       # Auto mode - commits without prompting
+/ci           # Normal mode - prompts for approval, then commits and pushes
+/ci yes       # Auto mode - commits and pushes without prompting
 ```
 
 ## Workflow
@@ -36,13 +41,16 @@ Stage all changes, generate a commit message, and commit after user approval.
    - Once approved (or if 'yes' argument provided), run `git commit -m "MESSAGE"` (or `git commit -F -` with multi-line message)
    - Report the commit hash and summary to the user
 
+5. **Push Changes**
+   - After successful commit, run `git push` to push to remote
+   - Report push status to user
+
 ## Important Constraints
 
 - **NEVER auto-commit**: ALWAYS ask user for approval before running `git commit` - NEVER commit without explicit user confirmation (UNLESS the 'yes' argument is provided)
 - **Single commit only**: This command creates exactly ONE new commit on top of the current branch
 - **No history rewriting**: Never use `--amend`, `--fixup`, rebase, or reset operations
-- **No pushing**: Never run `git push` - commit stays local only
-- **No other mutations**: The only git operation is `git commit` to create a single new commit
+- **No other mutations**: The only git operations are `git commit` and `git push`
 
 ## Requirements
 
@@ -82,6 +90,9 @@ for data validation. Updates app.ts to use the new utilities.
 
 Creating commit...
 [master abc1234] Add helper utilities and refactor app
+
+Pushing to remote...
+Done. Pushed to origin/master.
 ```
 
 ## Notes
