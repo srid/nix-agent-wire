@@ -7,6 +7,8 @@
 
 - **NEVER auto-commit**: ALWAYS consult user before running `git commit` - never commit without explicit user approval
 - User will use `/ci` command when they want Claude to help with commits
+- **Avoid destructive operations**: No force pushing, rebasing, or amending commits
+- **devShell required**: Run commits inside devShell if pre-commit hooks exist
 
 # Tools
 
