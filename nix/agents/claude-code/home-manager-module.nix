@@ -3,20 +3,26 @@
 let
   cfg = config.programs.claude-code;
 
-  # Auto-wire subagents from subagents/ directory
-  subagentsDir = cfg.autoWire.dir + "/subagents";
-  autoAgents = lib.optionalAttrs (builtins.pathExists subagentsDir)
+  autoDir = cfg.autoWire.dir;
+  autoWireEnabled = autoDir != null && cfg.autoWire.enable;
+
+  agentsDir = toString autoDir + "/agents";
+  commandsDir = toString autoDir + "/commands";
+  skillsDir = toString autoDir + "/skills";
+  mcpDir = toString autoDir + "/mcp";
+  settingsFile = toString autoDir + "/settings/claude-code.nix";
+  memoryFile = toString autoDir + "/memory.md";
+
+  autoAgents = lib.optionalAttrs (autoWireEnabled && builtins.pathExists agentsDir)
     (lib.mapAttrs'
       (fileName: _:
         lib.nameValuePair
           (lib.removeSuffix ".md" fileName)
-          (builtins.readFile (subagentsDir + "/${fileName}"))
+          (builtins.readFile (agentsDir + "/${fileName}"))
       )
-      (builtins.readDir subagentsDir));
+      (builtins.readDir agentsDir));
 
-  # Auto-wire commands from commands/ directory
-  commandsDir = cfg.autoWire.dir + "/commands";
-  autoCommands = lib.optionalAttrs (builtins.pathExists commandsDir)
+  autoCommands = lib.optionalAttrs (autoWireEnabled && builtins.pathExists commandsDir)
     (lib.mapAttrs'
       (fileName: _:
         lib.nameValuePair
@@ -25,35 +31,16 @@ let
       )
       (builtins.readDir commandsDir));
 
-  # Auto-wire skills from skills/ directory
-  skillsDir = cfg.autoWire.dir + "/skills";
-  skillDirs = lib.optionalAttrs (builtins.pathExists skillsDir)
-    (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
+  autoSkills = lib.optionalAttrs (autoWireEnabled && builtins.pathExists skillsDir)
+    (lib.mapAttrs'
+      (skillName: _:
+        lib.nameValuePair
+          skillName
+          (skillsDir + "/" + skillName)
+      )
+      (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir)));
 
-  # Process skill: if it has default.nix, build and substitute; otherwise use as-is
-  processSkill = skillName:
-    let
-      skillPath = skillsDir + "/${skillName}";
-      hasDefaultNix = builtins.pathExists (skillPath + "/default.nix");
-    in
-    if hasDefaultNix then
-      let
-        skillPkg = pkgs.callPackage skillPath { };
-      in
-      pkgs.runCommand "${skillName}-skill" { } ''
-        mkdir -p $out
-        cp -r ${skillPath}/* $out/
-        rm $out/default.nix
-        chmod +w $out/SKILL.md
-        substitute ${skillPath}/SKILL.md $out/SKILL.md \
-          --replace-fail '@${skillName}@' '${skillPkg}/bin/${skillName}'
-      ''
-    else
-      skillPath;
-
-  # Auto-wire MCP servers from mcp/ directory
-  mcpDir = cfg.autoWire.dir + "/mcp";
-  autoMcpServers = lib.optionalAttrs (builtins.pathExists mcpDir)
+  autoMcpServers = lib.optionalAttrs (autoWireEnabled && builtins.pathExists mcpDir)
     (lib.mapAttrs'
       (fileName: _:
         lib.nameValuePair
@@ -62,14 +49,10 @@ let
       )
       (builtins.readDir mcpDir));
 
-  # Auto-load settings from settings.nix
-  settingsFile = cfg.autoWire.dir + "/settings.nix";
-  autoSettings = lib.optionalAttrs (builtins.pathExists settingsFile)
+  autoSettings = lib.optionalAttrs (autoWireEnabled && builtins.pathExists settingsFile)
     (import settingsFile);
 
-  # Auto-load memory from memory.md
-  memoryFile = cfg.autoWire.dir + "/memory.md";
-  autoMemory = lib.optionalAttrs (builtins.pathExists memoryFile)
+  autoMemory = lib.optionalAttrs (autoWireEnabled && builtins.pathExists memoryFile)
     { text = builtins.readFile memoryFile; };
 
 in
@@ -80,7 +63,7 @@ in
         type = lib.types.bool;
         default = true;
         description = ''
-          Whether to automatically wire up subagents, commands, skills, and MCP servers from autoWire.dir.
+          Whether to automatically wire up agents, commands, skills, and MCP servers from autoWire.dir.
           Set to false if you want to manually configure these.
         '';
       };
@@ -89,38 +72,27 @@ in
         type = lib.types.nullOr lib.types.path;
         default = null;
         description = ''
-          Path to the claude-code directory containing subagents/, commands/, skills/, mcp/, settings.nix, and memory.md.
+          Path to the claude-code directory containing agents/, commands/, skills/, mcp/, settings/claude-code.nix, and memory.md.
           When set, these will be automatically discovered and configured.
         '';
       };
     };
   };
 
-  config = lib.mkIf (cfg.autoWire.dir != null && cfg.autoWire.enable) {
-    # Link skill directories to ~/.claude/skills/
-    home.file = lib.mapAttrs'
-      (skillName: _:
-        lib.nameValuePair ".claude/skills/${skillName}" {
-          source = processSkill skillName;
-          recursive = true;
-        }
-      )
-      skillDirs;
-
+  config = lib.mkIf autoWireEnabled {
     programs.claude-code = {
-      # Auto-wire settings if settings.nix exists
+      enable = lib.mkDefault true;
+
       settings = lib.mkDefault autoSettings;
 
-      # Auto-wire memory if memory.md exists
       memory = lib.mkDefault autoMemory;
 
-      # Auto-wire commands from commands/ directory
       commands = lib.mkDefault autoCommands;
 
-      # Auto-wire agents from subagents/ directory
       agents = lib.mkDefault autoAgents;
 
-      # Auto-wire MCP servers from mcp/ directory
+      skills = lib.mkIf (autoSkills != { }) (lib.mkDefault autoSkills);
+
       mcpServers = lib.mkDefault autoMcpServers;
     };
   };

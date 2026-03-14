@@ -6,6 +6,6 @@
   in
     pipeline
       { build.systems = ["x86_64-linux", "aarch64-darwin"]
-      , build.flakes = [".", "./nix/agents/claude-code/test"]
+      , build.flakes = [".", "./nix/agents/claude-code/test", "./nix/agents/opencode/test"]
       , signoff.enable = True
       }

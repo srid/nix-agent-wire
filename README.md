@@ -1,6 +1,9 @@
-# Srid's Claude Code Configuration
+# Srid's AI Code Agent Configuration
 
-This repo provides the `homeManagerModules.claude-code` flake output for auto-wiring your Claude Code configuration. My own Claude Code configuration exists in this same repo.
+This repo provides home-manager modules for auto-wiring AI code agent configurations:
+
+- `homeManagerModules.claude-code` - Claude Code
+- `homeManagerModules.opencode` - OpenCode
 
 ## Usage
 
@@ -14,7 +17,7 @@ Add as flake input:
 }
 ```
 
-Import the home-manager module and set `autoWire.dir`:
+### Claude Code
 
 ```nix
 {
@@ -29,9 +32,24 @@ Import the home-manager module and set `autoWire.dir`:
 }
 ```
 
+### OpenCode
+
+```nix
+{
+  imports = [
+    AI.homeManagerModules.opencode
+  ];
+
+  programs.opencode = {
+    enable = true;
+    autoWire.dir = AI;
+  };
+}
+```
+
 ## Directory Layout
 
-The `autoWire` feature expects this structure:
+Both modules use `autoWire` to discover configuration from a directory:
 
 ```
 .
@@ -39,38 +57,30 @@ The `autoWire` feature expects this structure:
 │   ├── hack.md       # /hack command
 │   └── pr.md         # /pr command
 ├── skills/           # Skill directories
-│   ├── nix/
-│   │   └── SKILL.md  # Simple skill (markdown only)
-│   └── article-extractor/
-│       ├── SKILL.md  # Skill definition with @placeholder@
-│       └── default.nix  # Optional: builds tool, substitutes @placeholder@
-├── subagents/        # Subagent definitions (.md files)
-│   └── pre-commit.md
+│   └── nix/
+│       └── SKILL.md  # Skill definition
+├── agents/           # Agent definitions (.md files)
+│   └── code-reviewer.md
 ├── mcp/              # MCP server configs (.nix files)
 │   ├── chrome-devtools.nix
 │   └── nixos-mcp.nix
-├── settings.nix      # Claude Code settings
+├── settings/         # Tool-specific settings
+│   └── claude-code.nix  # Claude Code settings
 └── memory.md         # Persistent memory/context
 ```
 
-**Files processed by autoWire:**
+**Both modules autoWire:**
 
-- **commands/*.md** → Slash commands (e.g., `/hack`, `/pr`)
-- **subagents/*.md** → Custom subagents for Task tool
-- **skills/*/SKILL.md** → Skills for specialized tasks
-  - If `default.nix` exists, builds package and substitutes `@skillname@` placeholders
-  - Example: `@article-extractor@` in SKILL.md becomes `/nix/store/.../bin/article-extractor`
+- **commands/*.md** → Slash commands
+- **agents/*.md** → Custom agents (use `mode: subagent` in frontmatter for OpenCode)
+- **skills/*/** → Skills (symlinked)
 - **mcp/*.nix** → MCP server configurations
-- **settings.nix** → Applied to `programs.claude-code.settings`
-- **memory.md** → Applied to `programs.claude-code.memory`
+- **memory.md** → Global rules
 
-### Skill Placeholder Substitution
+**Claude Code only:**
 
-Skills with `default.nix` can use placeholders in `SKILL.md`:
+- **settings/claude-code.nix** → `programs.claude-code.settings`
 
-1. Create `skills/myskill/default.nix` that builds a package
-2. In `skills/myskill/SKILL.md`, use `@myskill@` where you need the binary path
-3. The module builds the package and replaces `@myskill@` with `/nix/store/.../bin/myskill`
+**OpenCode only:**
 
-This lets skill definitions reference Nix-built tools without hardcoding paths.
-
+- Uses `programs.mcp.servers` + `enableMcpIntegration` for MCP

@@ -12,7 +12,10 @@
   outputs = { self, nixpkgs, home-manager }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
       claude-code-module = import ../home-manager-module.nix;
       configDir = builtins.path { path = ./../../../..; name = "claude-code-config"; };
     in
