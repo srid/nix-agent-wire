@@ -62,10 +62,8 @@ Both modules use `autoWire` to discover configuration from a directory:
 │   └── article-extractor/
 │       ├── SKILL.md  # Skill definition with @placeholder@
 │       └── default.nix  # Optional: builds tool, substitutes @placeholder@
-├── agents/           # Agent definitions (.md files) [OpenCode]
+├── agents/           # Agent definitions (.md files)
 │   └── code-reviewer.md
-├── subagents/        # Subagent definitions (.md files) [Claude Code]
-│   └── pre-commit.md
 ├── mcp/              # MCP server configs (.nix files)
 │   ├── chrome-devtools.nix
 │   └── nixos-mcp.nix
@@ -73,22 +71,22 @@ Both modules use `autoWire` to discover configuration from a directory:
 └── memory.md         # Persistent memory/context
 ```
 
-**Claude Code autoWire:**
+**Both modules autoWire:**
 
 - **commands/*.md** → Slash commands
-- **subagents/*.md** → Custom subagents
-- **skills/*/SKILL.md** → Skills (with optional `default.nix` for placeholder substitution)
+- **agents/*.md** → Custom agents (use `mode: subagent` in frontmatter for OpenCode)
+- **skills/*/SKILL.md** → Skills
 - **mcp/*.nix** → MCP server configurations
-- **settings.nix** → Applied to `programs.claude-code.settings`
-- **memory.md** → Applied to `programs.claude-code.memory`
+- **memory.md** → Global rules
 
-**OpenCode autoWire:**
+**Claude Code only:**
 
-- **commands/*.md** → Slash commands
-- **agents/*.md** → Custom agents
-- **skills/** → Skill directories (symlinked)
-- **mcp/*.nix** → MCP server configurations (via `programs.mcp.servers` + `enableMcpIntegration`)
-- **memory.md** → Applied to `programs.opencode.rules`
+- **settings.nix** → `programs.claude-code.settings`
+- **skills/*/default.nix** → Placeholder substitution
+
+**OpenCode only:**
+
+- Uses `programs.mcp.servers` + `enableMcpIntegration` for MCP
 
 ### Skill Placeholder Substitution [Claude Code only]
 

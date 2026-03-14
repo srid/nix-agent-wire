@@ -3,16 +3,16 @@
 let
   cfg = config.programs.claude-code;
 
-  # Auto-wire subagents from subagents/ directory
-  subagentsDir = cfg.autoWire.dir + "/subagents";
-  autoAgents = lib.optionalAttrs (builtins.pathExists subagentsDir)
+  # Auto-wire agents from agents/ directory
+  agentsDir = cfg.autoWire.dir + "/agents";
+  autoAgents = lib.optionalAttrs (builtins.pathExists agentsDir)
     (lib.mapAttrs'
       (fileName: _:
         lib.nameValuePair
           (lib.removeSuffix ".md" fileName)
-          (builtins.readFile (subagentsDir + "/${fileName}"))
+          (builtins.readFile (agentsDir + "/${fileName}"))
       )
-      (builtins.readDir subagentsDir));
+      (builtins.readDir agentsDir));
 
   # Auto-wire commands from commands/ directory
   commandsDir = cfg.autoWire.dir + "/commands";
@@ -80,7 +80,7 @@ in
         type = lib.types.bool;
         default = true;
         description = ''
-          Whether to automatically wire up subagents, commands, skills, and MCP servers from autoWire.dir.
+          Whether to automatically wire up agents, commands, skills, and MCP servers from autoWire.dir.
           Set to false if you want to manually configure these.
         '';
       };
@@ -89,7 +89,7 @@ in
         type = lib.types.nullOr lib.types.path;
         default = null;
         description = ''
-          Path to the claude-code directory containing subagents/, commands/, skills/, mcp/, settings.nix, and memory.md.
+          Path to the claude-code directory containing agents/, commands/, skills/, mcp/, settings.nix, and memory.md.
           When set, these will be automatically discovered and configured.
         '';
       };
@@ -117,7 +117,7 @@ in
       # Auto-wire commands from commands/ directory
       commands = lib.mkDefault autoCommands;
 
-      # Auto-wire agents from subagents/ directory
+      # Auto-wire agents from agents/ directory
       agents = lib.mkDefault autoAgents;
 
       # Auto-wire MCP servers from mcp/ directory
