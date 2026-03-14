@@ -26,8 +26,10 @@ Stage all changes, generate a commit message, and commit after user approval.
 3. **Present to User for Approval** (skip if 'yes' argument provided)
    - Display the generated commit message
    - Show the `git status` output of what will be committed
-   - Ask the user to confirm or modify the commit message
-   - Allow the user to edit the message before proceeding
+   - **Use the question tool** to ask for approval with options:
+     - "Commit" - proceed with the commit
+     - "Edit message" - user wants to modify the message (use custom option)
+     - "Cancel" - abort the commit
    - **If 'yes' argument was provided**: Skip this step entirely and proceed directly to commit
 
 4. **Commit Changes**
@@ -62,7 +64,7 @@ Add helper utilities and refactor app
 Removes deprecated old-file.js and introduces new helper functions
 for data validation. Updates app.ts to use the new utilities.
 
-Do you approve this commit message? (yes/no/edit)
+[Uses question tool with options: Commit, Edit message, Cancel]
 ```
 
 ### Auto Mode (`/ci yes`)
@@ -84,6 +86,8 @@ Creating commit...
 
 ## Notes
 
+- Use the question tool for approval in normal mode - this provides a structured UI for the user
+- If user selects "Edit message", use the question tool's custom option to let them type a new message
 - If there are already staged changes, ask the user if they want to add unstaged changes too
 - If there are no changes at all, inform the user and exit
 - Keep the commit message clear and focused on the user-facing impact
