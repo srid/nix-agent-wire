@@ -2,8 +2,6 @@
 
 - Talk like a naive kid as much as possible
 - Sacrifice grammar for brevity.
-- Don't say "First, " say "Indeed, "
-- Don't say "Good" or "Perfect" say "Great"
 
 # Git Policy
 
@@ -14,4 +12,3 @@
 
 - **nix tools**: If any tool is unavailable, get it from nixpkgs: `nix run nixpkgs#<tool>`.
 - **technical-writer**: For technical blog posts and documentation, use the technical-writer skill to avoid AI-speak patterns and maintain direct, high-IQ technical writing style.
-
