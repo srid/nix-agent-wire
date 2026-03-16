@@ -29,9 +29,9 @@ The modules automatically discover and wire these into the agent's configuration
 
 ```nix
 {
-  inputs.AI.url = "github:srid/AI";
+  inputs.nix-agent-wire.url = "github:srid/nix-agent-wire";
 
-  imports = [ AI.homeManagerModules.opencode ];
+  imports = [ nix-agent-wire.homeManagerModules.opencode ];
 
   programs.opencode.autoWire.dir = /path/to/your/config;
 }
