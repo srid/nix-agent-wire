@@ -18,7 +18,7 @@
         config.allowUnfree = true;
       };
       claude-code-module = import ../home-manager-module.nix;
-      configDir = builtins.path { path = ./../../../..; name = "claude-code-config"; };
+      configDir = builtins.path { path = ./../../../../example; name = "claude-code-config"; };
     in
     {
       checks.${system} = {
@@ -70,9 +70,18 @@
             machine.succeed("test -d /home/testuser/.claude/skills/nix-flake")
             machine.succeed("test -d /home/testuser/.claude/skills/nix-haskell")
 
-            # Local skills from this repo
-            machine.succeed("test -d /home/testuser/.claude/skills/haskell")
-            machine.succeed("test -d /home/testuser/.claude/skills/technical-writer")
+            # Local skill from example/
+            machine.succeed("test -d /home/testuser/.claude/skills/example")
+
+            # Verify agent is auto-wired
+            machine.succeed("test -f /home/testuser/.claude/agents/example.md")
+
+            # Verify command is auto-wired
+            machine.succeed("test -f /home/testuser/.claude/commands/example.md")
+
+            # Verify settings.json exists and has expected content
+            machine.succeed("test -f /home/testuser/.claude/settings.json")
+            machine.succeed("grep -q 'bypassPermissions' /home/testuser/.claude/settings.json")
           '';
         };
       };

@@ -1,5 +1,5 @@
 {
-  description = "AI Code Agent Nix configuration";
+  description = "Nix autowiring for LLM agents";
 
   inputs.skills.url = "github:juspay/skills";
 

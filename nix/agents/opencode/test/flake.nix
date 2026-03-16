@@ -15,7 +15,7 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       opencode-module = import ../home-manager-module.nix;
-      configDir = builtins.path { path = ./../../../..; name = "opencode-config"; };
+      configDir = builtins.path { path = ./../../../../example; name = "opencode-config"; };
     in
     {
       checks.${system} = {
@@ -62,7 +62,7 @@
 
             # Verify commands are auto-wired (home-manager uses singular 'command')
             machine.succeed("test -d /home/testuser/.config/opencode/command")
-            machine.succeed("test -f /home/testuser/.config/opencode/command/plan.md")
+            machine.succeed("test -f /home/testuser/.config/opencode/command/example.md")
 
             # Verify skills are auto-wired
             machine.succeed("test -d /home/testuser/.config/opencode/skill")
@@ -71,9 +71,11 @@
             machine.succeed("test -d /home/testuser/.config/opencode/skill/nix-flake")
             machine.succeed("test -d /home/testuser/.config/opencode/skill/nix-haskell")
 
-            # Local skills from this repo
-            machine.succeed("test -d /home/testuser/.config/opencode/skill/haskell")
-            machine.succeed("test -d /home/testuser/.config/opencode/skill/technical-writer")
+            # Local skill from example/
+            machine.succeed("test -d /home/testuser/.config/opencode/skill/example")
+
+            # Verify agent is auto-wired
+            machine.succeed("test -f /home/testuser/.config/opencode/agent/example.md")
 
             # Verify opencode.json is created in XDG config location
             machine.succeed("test -f /home/testuser/.config/opencode/opencode.json")
@@ -81,8 +83,8 @@
             # Verify MCP servers are in config (home-manager uses 'mcp' key)
             machine.succeed("grep -q '\"mcp\"' /home/testuser/.config/opencode/opencode.json")
 
-            # Verify auto-wired chrome-devtools is present
-            machine.succeed("grep -q 'chrome-devtools' /home/testuser/.config/opencode/opencode.json")
+            # Verify auto-wired example MCP server is present
+            machine.succeed("grep -q 'example' /home/testuser/.config/opencode/opencode.json")
           '';
         };
 
@@ -135,7 +137,7 @@
             machine.succeed("test -f /home/testuser/.config/opencode/opencode.json")
 
             # Verify both auto-wired and user-defined MCP servers are present (merge)
-            machine.succeed("grep -q 'chrome-devtools' /home/testuser/.config/opencode/opencode.json")
+            machine.succeed("grep -q 'example' /home/testuser/.config/opencode/opencode.json")
             machine.succeed("grep -q 'existing-server' /home/testuser/.config/opencode/opencode.json")
           '';
         };
