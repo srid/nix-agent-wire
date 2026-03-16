@@ -63,7 +63,7 @@ your-config/
 
 ## Examples
 
-- [srid/nixos-config](https://github.com/srid/nixos-config) - Real-world NixOS configuration using nix-agent-wire
+- [srid/nixos-config](https://github.com/srid/nixos-config/tree/master/AI) - Srid's configuration
 - [juspay/skills](https://github.com/juspay/skills) - Collection of reusable skills for LLM coding agents
 - `example/` in this repo - Minimal template showing all file types
 
