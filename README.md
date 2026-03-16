@@ -1,47 +1,66 @@
 # Nix Autowiring for LLM Agents
 
-> **WIP** - This project is under active development.
-
 Home-manager modules that auto-wire standard configuration formats for LLM coding agents.
+
+## Why
+
+LLM agents like Claude Code and OpenCode need configs scattered across multiple files and formats. This module lets you:
+
+- Keep all agent configs in one directory structure
+- Auto-discover and wire configs without manual symlinks
+- Share configs across machines via Nix
 
 ## Supported Agents
 
-- **Claude Code** - `homeManagerModules.claude-code`
-- **OpenCode** - `homeManagerModules.opencode`
-
-## How It Works
-
-Point `autoWire.dir` to a directory containing standard-format files:
-
-```
-your-config/
-├── agents/*.md          # Agent definitions
-├── commands/*.md        # Slash commands
-├── skills/*/SKILL.md    # Local skills
-├── mcp/*.nix            # MCP server configs
-├── settings/claude-code.nix  # Tool-specific settings
-└── memory.md            # Global rules/context
-```
-
-The modules automatically discover and wire these into the agent's configuration.
+| Agent | Module |
+|-------|--------|
+| Claude Code | `homeModules.claude-code` |
+| OpenCode | `homeModules.opencode` |
 
 ## Usage
+
+Add to your home-manager config:
 
 ```nix
 {
   inputs.nix-agent-wire.url = "github:srid/nix-agent-wire";
 
-  imports = [ nix-agent-wire.homeManagerModules.opencode ];
-
-  programs.opencode.autoWire.dir = /path/to/your/config;
+  outputs = { inputs, ... }: {
+    homeModules.default = { ... }: {
+      imports = [ inputs.nix-agent-wire.homeModules.opencode ];
+      programs.opencode.autoWire.dir = ./my-agent-config;
+    };
+  };
 }
 ```
 
-See `example/` for a minimal template.
+## Directory Structure
 
-## External Skills
+```
+your-config/
+├── memory.md            # Global rules/context (injected into every session)
+├── agents/*.md          # Sub-agents for specialized tasks
+├── commands/*.md        # Slash commands (/my-command)
+├── skills/*/SKILL.md    # Reusable skill modules
+├── mcp/*.nix            # MCP server configs
+└── settings/*.nix       # Tool-specific settings
+```
 
-Nix skills (`nix-flake`, `nix-haskell`) are automatically included from [juspay/skills](https://github.com/juspay/skills).
+### File Types
+
+| File | Purpose |
+|------|---------|
+| `memory.md` | Rules/context added to every conversation. Put coding standards, git policies, tool preferences here. |
+| `agents/*.md` | Specialized sub-agents. Each has YAML frontmatter with `name`, `description`, `tools`. |
+| `commands/*.md` | Slash commands invoked as `/command-name`. Automate repetitive workflows. |
+| `skills/*/SKILL.md` | Reusable skill modules. Loaded on demand when working with specific file types or frameworks. |
+| `mcp/*.nix` | MCP server definitions. Return `{ command, args }` attrset. |
+| `settings/*.nix` | Agent-specific settings (e.g., `claude-code.nix` for Claude Code permissions). |
+
+## Examples
+
+- [srid/nixos-config](https://github.com/srid/nixos-config) - Real-world NixOS configuration using nix-agent-wire
+- `example/` in this repo - Minimal template showing all file types
 
 ## CI
 
