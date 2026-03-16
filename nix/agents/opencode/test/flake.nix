@@ -7,10 +7,9 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    skills.url = "github:juspay/skills";
   };
 
-  outputs = { self, nixpkgs, home-manager, skills }:
+  outputs = { self, nixpkgs, home-manager }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -37,7 +36,6 @@
               useUserPackages = true;
               users.testuser = {
                 imports = [
-                  skills.homeModules.opencode
                   opencode-module
                 ];
 
@@ -60,16 +58,12 @@
             machine.start()
             machine.wait_for_unit("home-manager-testuser.service")
 
-            # Verify commands are auto-wired (home-manager uses singular 'command')
+            # Verify commands are auto-wired
             machine.succeed("test -d /home/testuser/.config/opencode/command")
             machine.succeed("test -f /home/testuser/.config/opencode/command/example.md")
 
             # Verify skills are auto-wired
             machine.succeed("test -d /home/testuser/.config/opencode/skill")
-
-            # External skills from juspay/skills
-            machine.succeed("test -d /home/testuser/.config/opencode/skill/nix-flake")
-            machine.succeed("test -d /home/testuser/.config/opencode/skill/nix-haskell")
 
             # Local skill from example/
             machine.succeed("test -d /home/testuser/.config/opencode/skill/example")
@@ -77,10 +71,10 @@
             # Verify agent is auto-wired
             machine.succeed("test -f /home/testuser/.config/opencode/agent/example.md")
 
-            # Verify opencode.json is created in XDG config location
+            # Verify opencode.json is created
             machine.succeed("test -f /home/testuser/.config/opencode/opencode.json")
 
-            # Verify MCP servers are in config (home-manager uses 'mcp' key)
+            # Verify MCP servers are in config
             machine.succeed("grep -q '\"mcp\"' /home/testuser/.config/opencode/opencode.json")
 
             # Verify auto-wired example MCP server is present
@@ -106,7 +100,6 @@
               useUserPackages = true;
               users.testuser = {
                 imports = [
-                  skills.homeModules.opencode
                   opencode-module
                 ];
 
@@ -136,7 +129,7 @@
             # Verify opencode.json exists
             machine.succeed("test -f /home/testuser/.config/opencode/opencode.json")
 
-            # Verify both auto-wired and user-defined MCP servers are present (merge)
+            # Verify both auto-wired and user-defined MCP servers are present
             machine.succeed("grep -q 'example' /home/testuser/.config/opencode/opencode.json")
             machine.succeed("grep -q 'existing-server' /home/testuser/.config/opencode/opencode.json")
           '';

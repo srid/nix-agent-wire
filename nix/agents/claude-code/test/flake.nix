@@ -7,10 +7,9 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    skills.url = "github:juspay/skills";
   };
 
-  outputs = { self, nixpkgs, home-manager, skills }:
+  outputs = { self, nixpkgs, home-manager }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -40,7 +39,6 @@
               useUserPackages = true;
               users.testuser = {
                 imports = [
-                  skills.homeModules.claude-code
                   claude-code-module
                 ];
 
@@ -65,10 +63,6 @@
 
             # Verify skills are auto-wired
             machine.succeed("test -d /home/testuser/.claude/skills")
-
-            # External skills from juspay/skills
-            machine.succeed("test -d /home/testuser/.claude/skills/nix-flake")
-            machine.succeed("test -d /home/testuser/.claude/skills/nix-haskell")
 
             # Local skill from example/
             machine.succeed("test -d /home/testuser/.claude/skills/example")
