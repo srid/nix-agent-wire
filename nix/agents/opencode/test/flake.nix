@@ -70,9 +70,17 @@
           machine.succeed("test -d /home/testuser/.config/opencode/skill/example")
           machine.succeed("test -d /home/testuser/.config/opencode/skill/second-skill")
 
+          # Verify skill SKILL.md contains actual content, not a store path string
+          machine.succeed("grep -q 'Example Skill' /home/testuser/.config/opencode/skill/example/SKILL.md")
+          machine.fail("grep -q '/nix/store' /home/testuser/.config/opencode/skill/example/SKILL.md")
+
           # Verify agents from both dirs
           machine.succeed("test -f /home/testuser/.config/opencode/agent/example.md")
           machine.succeed("test -f /home/testuser/.config/opencode/agent/second.md")
+
+          # Verify agent files contain actual content, not a store path string
+          machine.succeed("grep -q 'Example Agent' /home/testuser/.config/opencode/agent/example.md")
+          machine.fail("grep -q '/nix/store' /home/testuser/.config/opencode/agent/example.md")
 
           # Verify opencode.json is created
           machine.succeed("test -f /home/testuser/.config/opencode/opencode.json")
