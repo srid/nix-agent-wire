@@ -43,7 +43,7 @@
         (fileName: _:
           lib.nameValuePair
             (lib.removeSuffix ".md" fileName)
-            (path + "/" + fileName)
+            (builtins.readFile (path + "/${fileName}"))
         )
         (builtins.readDir path));
 

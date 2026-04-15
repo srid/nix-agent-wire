@@ -50,11 +50,19 @@ in
 
       agents = lib.mkDefault autoAgents;
 
-      skills = lib.mkMerge [
-        (lib.mkIf (autoSkills != { }) autoSkills)
-      ];
-
       mcpServers = lib.mkDefault autoMcpServers;
     };
+
+    # Wire skills as directory symlinks via home.file directly.
+    # programs.claude-code.skills uses `either lines path` which matches
+    # string store paths as `lines` (writing the path string as text).
+    # Using home.file with source creates proper directory symlinks.
+    home.file = lib.mkIf (autoSkills != { }) (
+      lib.mapAttrs' (name: path:
+        lib.nameValuePair ".claude/skills/${name}" {
+          source = path;
+        }
+      ) autoSkills
+    );
   };
 }
