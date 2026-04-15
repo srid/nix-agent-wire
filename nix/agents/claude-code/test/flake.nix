@@ -65,9 +65,17 @@
           machine.succeed("test -d /home/testuser/.claude/skills/example")
           machine.succeed("test -d /home/testuser/.claude/skills/second-skill")
 
+          # Verify skill SKILL.md contains actual content, not a store path string
+          machine.succeed("grep -q 'Example Skill' /home/testuser/.claude/skills/example/SKILL.md")
+          machine.fail("grep -q '/nix/store' /home/testuser/.claude/skills/example/SKILL.md")
+
           # Verify agents from both dirs
           machine.succeed("test -f /home/testuser/.claude/agents/example.md")
           machine.succeed("test -f /home/testuser/.claude/agents/second.md")
+
+          # Verify agent files contain actual content, not a store path string
+          machine.succeed("grep -q 'Example Agent' /home/testuser/.claude/agents/example.md")
+          machine.fail("grep -q '/nix/store' /home/testuser/.claude/agents/example.md")
 
           # Verify commands from both dirs
           machine.succeed("test -f /home/testuser/.claude/commands/example.md")
